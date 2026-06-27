@@ -1,36 +1,29 @@
 import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
-import {
-  ArrowDown,
-  Bot,
-  CheckCircle2,
-  Clipboard,
-  Code2,
-  FileCode2,
-  Languages,
-  MonitorCog,
-  Search,
-  Sparkles,
-  Wand2,
-} from "lucide-react";
+import { ArrowDown, Bot, Check, Code2, Copy, FileCode2, Hammer, MonitorCog, Search, Sparkles } from "lucide-react";
 import type { Agent, OptimizeResponse, Purpose } from "../shared/promptForge";
 import "./styles.css";
 
 type Language = "uz" | "en" | "ru";
 
 type Copy = {
-  heroTitle: string;
+  eyebrow: string;
+  heroLead: string;
+  heroEmph: string;
   heroSub: string;
   agent: string;
   purpose: string;
-  promptLabel: string;
+  rawLabel: string;
+  forgedLabel: string;
   placeholder: string;
+  tryLabel: string;
+  examples: string[];
   clear: string;
-  optimize: string;
-  optimizing: string;
-  output: string;
+  forge: string;
+  forging: string;
   copy: string;
   copied: string;
+  empty: string;
   error: string;
   aiMode: string;
   heuristicMode: string;
@@ -38,55 +31,73 @@ type Copy = {
 
 const copy: Record<Language, Copy> = {
   uz: {
-    heroTitle: "Promptni AI agent uchun tayyorlang",
-    heroSub: "Istalgan tilda yozing — biz uni inglizcha, aniq topshiriqqa aylantiramiz.",
+    eyebrow: "PromptForge · istalgan til → English",
+    heroLead: "Istalgan til kiradi.",
+    heroEmph: "Inglizcha, aniq topshiriq chiqadi.",
+    heroSub:
+      "Promptingizni Codex, Claude yoki istalgan agent birinchi urinishdayoq tushunadigan aniq, tuzilgan topshiriqqa aylantiramiz.",
     agent: "Agent",
     purpose: "Maqsad",
-    promptLabel: "Promptingiz",
-    placeholder: "Masalan: React ilovamga GitHub orqali login qo'shib ber...",
+    rawLabel: "Xom prompt — istalgan til",
+    forgedLabel: "Tayyor prompt — English",
+    placeholder: "Promptingizni shu yerga yozing — o'zbekcha, ruscha yoki istalgan tilda.",
+    tryLabel: "Namuna:",
+    examples: ["React ilovamga GitHub login qo'sh", "Bu API uchun unit testlar yoz"],
     clear: "Tozalash",
-    optimize: "Optimallashtirish",
-    optimizing: "Tayyorlanmoqda...",
-    output: "Optimallashtirilgan prompt · English",
+    forge: "Tayyorlash",
+    forging: "Tayyorlanmoqda…",
     copy: "Nusxalash",
     copied: "Nusxalandi",
+    empty: "Tayyor prompt shu yerda — toza, inglizcha va agentga tayyor — paydo bo'ladi.",
     error: "Xatolik yuz berdi. Qayta urinib ko'ring.",
-    aiMode: "AI rejimi",
-    heuristicMode: "Heuristik rejim · to'liq AI uchun ANTHROPIC_API_KEY o'rnating",
+    aiMode: "AI",
+    heuristicMode: "Heuristik",
   },
   en: {
-    heroTitle: "Get your prompt agent-ready",
-    heroSub: "Write in any language — we turn it into a clear, English instruction.",
+    eyebrow: "PromptForge · any language → English",
+    heroLead: "Any language in.",
+    heroEmph: "Agent-ready English out.",
+    heroSub:
+      "We rewrite your prompt into a clear, structured instruction that Codex, Claude, or any agent follows on the first try.",
     agent: "Agent",
     purpose: "Purpose",
-    promptLabel: "Your prompt",
-    placeholder: "Example: Add GitHub login to my React app...",
+    rawLabel: "Raw prompt — any language",
+    forgedLabel: "Forged prompt — English",
+    placeholder: "Write your prompt here — in any language.",
+    tryLabel: "Try one:",
+    examples: ["Add GitHub login to my React app", "Write unit tests for this API"],
     clear: "Clear",
-    optimize: "Optimize",
-    optimizing: "Working...",
-    output: "Optimized prompt · English",
+    forge: "Forge prompt",
+    forging: "Forging…",
     copy: "Copy",
     copied: "Copied",
+    empty: "Your forged prompt — clean, English, agent-ready — lands here.",
     error: "Something went wrong. Try again.",
-    aiMode: "AI mode",
-    heuristicMode: "Heuristic mode · set ANTHROPIC_API_KEY for full AI rewriting",
+    aiMode: "AI",
+    heuristicMode: "Heuristic",
   },
   ru: {
-    heroTitle: "Подготовьте промпт для AI-агента",
-    heroSub: "Пишите на любом языке — мы превратим его в понятную англоязычную инструкцию.",
+    eyebrow: "PromptForge · любой язык → English",
+    heroLead: "Любой язык на входе.",
+    heroEmph: "Чёткая английская инструкция на выходе.",
+    heroSub:
+      "Мы переписываем ваш промпт в ясную структурированную инструкцию, которую Codex, Claude или любой агент выполнит с первого раза.",
     agent: "Агент",
     purpose: "Назначение",
-    promptLabel: "Ваш промпт",
-    placeholder: "Например: Добавь вход через GitHub в моё React-приложение...",
+    rawLabel: "Сырой промпт — любой язык",
+    forgedLabel: "Готовый промпт — English",
+    placeholder: "Напишите промпт здесь — на любом языке.",
+    tryLabel: "Пример:",
+    examples: ["Добавь вход через GitHub в React-приложение", "Напиши unit-тесты для этого API"],
     clear: "Очистить",
-    optimize: "Оптимизировать",
-    optimizing: "Обработка...",
-    output: "Оптимизированный промпт · English",
+    forge: "Преобразовать",
+    forging: "Обработка…",
     copy: "Скопировать",
     copied: "Скопировано",
+    empty: "Готовый промпт — ясный, английский, для агента — появится здесь.",
     error: "Произошла ошибка. Попробуйте снова.",
-    aiMode: "Режим AI",
-    heuristicMode: "Эвристический режим · установите ANTHROPIC_API_KEY для полного AI",
+    aiMode: "AI",
+    heuristicMode: "Эвристика",
   },
 };
 
@@ -114,7 +125,7 @@ function App() {
   const [error, setError] = useState(false);
   const t = copy[language];
 
-  async function optimize() {
+  async function forge() {
     if (prompt.trim().length < 3) return;
     setLoading(true);
     setCopied(false);
@@ -149,123 +160,146 @@ function App() {
     setCopied(true);
   }
 
-  const showResult = error || result !== null;
+  const languages: Language[] = ["uz", "en", "ru"];
 
   return (
-    <main className="app">
-      <header className="topbar">
-        <div className="brand">
-          <span className="brand-mark">
-            <Sparkles size={18} />
-          </span>
-          <h1>PromptForge</h1>
-        </div>
-        <label className="language-select">
-          <Languages size={16} />
-          <select value={language} onChange={(event) => setLanguage(event.target.value as Language)}>
-            <option value="uz">Uz</option>
-            <option value="en">En</option>
-            <option value="ru">Ru</option>
-          </select>
-        </label>
-      </header>
-
-      <section className="hero">
-        <h2>{t.heroTitle}</h2>
-        <p>{t.heroSub}</p>
-      </section>
-
-      <section className="card composer">
-        <div className="field">
-          <span className="field-label">{t.agent}</span>
-          <div className="segmented">
-            {agents.map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.value}
-                  className={agent === item.value ? "segment selected" : "segment"}
-                  onClick={() => setAgent(item.value)}
-                >
-                  <Icon size={16} />
-                  <span className="segment-text">
-                    <strong>{item.label}</strong>
-                    <small>{item.detail}</small>
-                  </span>
-                </button>
-              );
-            })}
+    <div className="page">
+      <div className="shell">
+        <header className="masthead">
+          <div className="wordmark">
+            <span className="wordmark-mark">
+              <Hammer size={16} strokeWidth={2.4} />
+            </span>
+            <span className="wordmark-name">PromptForge</span>
           </div>
-        </div>
-
-        <div className="field">
-          <span className="field-label">{t.purpose}</span>
-          <div className="segmented">
-            {purposes.map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.value}
-                  className={purpose === item.value ? "segment selected" : "segment"}
-                  onClick={() => setPurpose(item.value)}
-                >
-                  <Icon size={16} />
-                  <span className="segment-text">
-                    <strong>{item.label}</strong>
-                  </span>
-                </button>
-              );
-            })}
+          <div className="lang-switch" role="group" aria-label="Interface language">
+            {languages.map((code) => (
+              <button
+                key={code}
+                className={language === code ? "lang on" : "lang"}
+                onClick={() => setLanguage(code)}
+              >
+                {code.toUpperCase()}
+              </button>
+            ))}
           </div>
-        </div>
+        </header>
 
-        <div className="field">
-          <div className="field-head">
-            <span className="field-label">{t.promptLabel}</span>
-            <span className="counter">{prompt.trim().length} / 4000</span>
+        <div className="rule" />
+
+        <section className="hero">
+          <span className="eyebrow">{t.eyebrow}</span>
+          <h1 className="hero-title">
+            {t.heroLead} <span className="hero-emph">{t.heroEmph}</span>
+          </h1>
+          <p className="hero-sub">{t.heroSub}</p>
+        </section>
+
+        <section className="forge">
+          <div className="settings">
+            <div className="setting">
+              <span className="setting-label">{t.agent}</span>
+              <div className="chips">
+                {agents.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.value}
+                      className={agent === item.value ? "chip on" : "chip"}
+                      onClick={() => setAgent(item.value)}
+                    >
+                      <Icon size={15} />
+                      <span className="chip-body">
+                        <strong>{item.label}</strong>
+                        <small>{item.detail}</small>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="setting">
+              <span className="setting-label">{t.purpose}</span>
+              <div className="chips">
+                {purposes.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.value}
+                      className={purpose === item.value ? "chip on" : "chip"}
+                      onClick={() => setPurpose(item.value)}
+                    >
+                      <Icon size={15} />
+                      <span className="chip-body">
+                        <strong>{item.label}</strong>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
-          <textarea
-            className="prompt-input"
-            value={prompt}
-            maxLength={4000}
-            onChange={(event) => setPrompt(event.target.value)}
-            placeholder={t.placeholder}
-          />
-        </div>
 
-        <div className="composer-actions">
-          <button className="ghost" disabled={loading} onClick={reset}>
-            {t.clear}
-          </button>
-          <button className="primary" disabled={loading || prompt.trim().length < 3} onClick={optimize}>
-            <Wand2 size={16} />
-            {loading ? t.optimizing : t.optimize}
-          </button>
-        </div>
-      </section>
-
-      {showResult && (
-        <>
-          <div className="flow-arrow">
-            <ArrowDown size={18} />
+          <div className="plate raw">
+            <div className="plate-head">
+              <span className="index">01</span>
+              <span className="plate-label">{t.rawLabel}</span>
+              <span className="char-count">{prompt.trim().length}/4000</span>
+            </div>
+            <textarea
+              className="raw-input"
+              value={prompt}
+              maxLength={4000}
+              onChange={(event) => setPrompt(event.target.value)}
+              placeholder={t.placeholder}
+            />
+            {prompt.length === 0 && (
+              <div className="examples">
+                <span className="examples-label">{t.tryLabel}</span>
+                {t.examples.map((ex) => (
+                  <button key={ex} className="example" onClick={() => setPrompt(ex)}>
+                    {ex}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="raw-actions">
+              <button className="text-btn" disabled={loading || prompt.length === 0} onClick={reset}>
+                {t.clear}
+              </button>
+              <button className="forge-btn" disabled={loading || prompt.trim().length < 3} onClick={forge}>
+                <Hammer size={16} strokeWidth={2.4} />
+                {loading ? t.forging : t.forge}
+              </button>
+            </div>
           </div>
-          <section className="card result-card">
-            <div className="result-head">
-              <span className="field-label">{t.output}</span>
-              <button className="icon-button" disabled={!result || loading} onClick={copyOutput}>
-                {copied ? <CheckCircle2 size={16} /> : <Clipboard size={16} />}
+
+          <div className="seam" aria-hidden="true">
+            <ArrowDown size={16} />
+          </div>
+
+          <div className={`plate forged${error ? " is-error" : ""}${result || error ? " filled" : ""}`}>
+            <div className="plate-head">
+              <span className="index">02</span>
+              <span className="plate-label">{t.forgedLabel}</span>
+              {result && <span className="stamp">{result.mode === "ai" ? t.aiMode : t.heuristicMode}</span>}
+              <button
+                className="copy-btn"
+                disabled={!result || loading}
+                onClick={copyOutput}
+                aria-label={t.copy}
+              >
+                {copied ? <Check size={15} /> : <Copy size={15} />}
                 <span>{copied ? t.copied : t.copy}</span>
               </button>
             </div>
-            <pre className={error ? "result-box error-text" : "result-box"}>
-              {error ? t.error : result?.optimizedPrompt}
+            <pre className={result || error ? "forged-out" : "forged-out empty"}>
+              {error ? t.error : result ? result.optimizedPrompt : t.empty}
             </pre>
-          </section>
-        </>
-      )}
-
-      <footer className="footer">{result?.mode === "ai" ? t.aiMode : t.heuristicMode}</footer>
-    </main>
+          </div>
+        </section>
+      </div>
+    </div>
   );
 }
 
