@@ -17,6 +17,7 @@
 - App still runs with no API key (heuristic mode). The LLM path must never let an API failure 500 the request — catch and fall back.
 - `npm test` (vitest) and `npm run typecheck` (both targets) must stay green. Tests must not make network calls.
 - Keep the 3-character minimum prompt validation.
+- While a request is in flight (`loading`), all action buttons (Optimize, Clear, Copy) must be disabled to prevent re-submitting or mutating state mid-request.
 
 ---
 
@@ -599,7 +600,7 @@ function App() {
             placeholder={t.placeholder}
           />
           <div className="pane-actions">
-            <button className="ghost" onClick={reset}>
+            <button className="ghost" disabled={loading} onClick={reset}>
               {t.clear}
             </button>
             <button className="primary" disabled={loading || prompt.trim().length < 3} onClick={optimize}>
@@ -612,7 +613,7 @@ function App() {
         <section className="pane result">
           <div className="pane-head">
             <span className="pane-label">{t.output}</span>
-            <button className="icon-button" disabled={!result} onClick={copyOutput}>
+            <button className="icon-button" disabled={!result || loading} onClick={copyOutput}>
               {copied ? <CheckCircle2 size={16} /> : <Clipboard size={16} />}
               <span>{copied ? t.copied : t.copy}</span>
             </button>
