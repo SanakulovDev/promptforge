@@ -23,3 +23,6 @@ node_modules/
 dist/
 dist-node/
 coverage/
+
+# Brainstorming visual companion
+.superpowers/
