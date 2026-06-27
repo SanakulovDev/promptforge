@@ -36,9 +36,11 @@ an async `optimizePrompt(input)` that returns `{ optimizedPrompt: string }`.
   commentary. The user's raw prompt, the agent, and the purpose are passed in the user
   message.
   - SDK: `@anthropic-ai/sdk` (`npm install @anthropic-ai/sdk`), `client.messages.create`.
-  - Model: `claude-opus-4-8` by default, overridable via `ANTHROPIC_MODEL` env var.
-  - `max_tokens: 2000`. No `thinking` config (off by default on Opus 4.8) to keep the
-    interactive round-trip fast. No sampling params (removed on 4.8).
+  - Model: `claude-haiku-4-5` by default (fast and cost-effective for a high-frequency
+    rewrite), overridable via `ANTHROPIC_MODEL` env var.
+  - `max_tokens: 2000`. No `thinking` config, to keep the interactive round-trip fast.
+    On Haiku 4.5 a single `temperature` is allowed, but we omit sampling params and steer
+    purely via the system prompt.
   - On API error (network, 4xx, 5xx): catch, log server-side, and fall back to the
     heuristic path so the endpoint always returns a usable result.
 - **Heuristic path (no API key, or LLM failure):** a self-contained, dependency-free
