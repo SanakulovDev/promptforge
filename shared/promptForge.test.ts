@@ -25,9 +25,11 @@ describe("buildSystemPrompt", () => {
 });
 
 describe("optimizePrompt", () => {
-  it("falls back to heuristic mode when no API key is set", async () => {
-    const original = process.env.ANTHROPIC_API_KEY;
+  it("falls back to heuristic mode when no provider key is set", async () => {
+    const originalAnthropic = process.env.ANTHROPIC_API_KEY;
+    const originalGemini = process.env.GEMINI_API_KEY;
     delete process.env.ANTHROPIC_API_KEY;
+    delete process.env.GEMINI_API_KEY;
     try {
       const result = await optimizePrompt({
         prompt: "Add login with GitHub",
@@ -37,7 +39,8 @@ describe("optimizePrompt", () => {
       expect(result.mode).toBe("heuristic");
       expect(result.optimizedPrompt).toContain("You are Codex");
     } finally {
-      if (original !== undefined) process.env.ANTHROPIC_API_KEY = original;
+      if (originalAnthropic !== undefined) process.env.ANTHROPIC_API_KEY = originalAnthropic;
+      if (originalGemini !== undefined) process.env.GEMINI_API_KEY = originalGemini;
     }
   });
 });

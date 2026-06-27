@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenAI } from "@google/genai";
 
 export type Agent = "codex" | "claude" | "general";
 export type Purpose = "coder" | "tester" | "code-review" | "general";
@@ -82,11 +83,34 @@ async function callClaude(input: OptimizeRequest): Promise<string> {
   return text;
 }
 
+async function callGemini(input: OptimizeRequest): Promise<string> {
+  const client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+  const response = await client.models.generateContent({
+    model,
+    contents: input.prompt,
+    config: {
+      systemInstruction: buildSystemPrompt(input.agent, input.purpose),
+      maxOutputTokens: 2000,
+    },
+  });
+  const text = (response.text ?? "").trim();
+  if (!text) throw new Error("Empty response from Gemini");
+  return text;
+}
+
 export async function optimizePrompt(input: OptimizeRequest): Promise<OptimizeResponse> {
+  // Provider order: Gemini (if GEMINI_API_KEY) → Claude (if ANTHROPIC_API_KEY) → offline heuristic.
+  if (process.env.GEMINI_API_KEY) {
+    try {
+      return { optimizedPrompt: await callGemini(input), mode: "ai" };
+    } catch (error) {
+      console.error("Gemini optimize failed, falling back:", error);
+    }
+  }
   if (process.env.ANTHROPIC_API_KEY) {
     try {
-      const optimizedPrompt = await callClaude(input);
-      return { optimizedPrompt, mode: "ai" };
+      return { optimizedPrompt: await callClaude(input), mode: "ai" };
     } catch (error) {
       console.error("Claude optimize failed, using heuristic fallback:", error);
     }

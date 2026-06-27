@@ -6,7 +6,9 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4174
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
-      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
-      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
-      GITHUB_REDIRECT_URI: ${GITHUB_REDIRECT_URI:-}
+      # Provider keys (optional). With GEMINI_API_KEY set, the engine uses Gemini;
+      # otherwise ANTHROPIC_API_KEY; otherwise the offline heuristic.
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-}
