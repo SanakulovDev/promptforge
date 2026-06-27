@@ -1,0 +1,30 @@
+{
+  "name": "promptforge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"vite --host 0.0.0.0\" \"tsx watch server/server.ts\"",
+    "build": "vite build && tsc -p server/tsconfig.json",
+    "preview": "vite preview --host 0.0.0.0",
+    "start": "node dist-node/server/server.js",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit && tsc -p server/tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "concurrently": "^9.0.0",
+    "playwright": "^1.61.1",
+    "tsx": "^4.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.0.0"
+  }
+}

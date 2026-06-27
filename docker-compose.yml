@@ -1,0 +1,12 @@
+services:
+  promptforge:
+    build: .
+    ports:
+      - "4174:4174"
+    environment:
+      NODE_ENV: production
+      PORT: 4174
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_REDIRECT_URI: ${GITHUB_REDIRECT_URI:-}
