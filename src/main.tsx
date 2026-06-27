@@ -1,6 +1,7 @@
 import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
+  ArrowDown,
   Bot,
   CheckCircle2,
   Clipboard,
@@ -18,7 +19,8 @@ import "./styles.css";
 type Language = "uz" | "en" | "ru";
 
 type Copy = {
-  tagline: string;
+  heroTitle: string;
+  heroSub: string;
   agent: string;
   purpose: string;
   promptLabel: string;
@@ -27,7 +29,6 @@ type Copy = {
   optimize: string;
   optimizing: string;
   output: string;
-  outputEmpty: string;
   copy: string;
   copied: string;
   error: string;
@@ -37,54 +38,54 @@ type Copy = {
 
 const copy: Record<Language, Copy> = {
   uz: {
-    tagline: "Promptni agent tushunadigan inglizcha topshiriqqa aylantiring",
+    heroTitle: "Promptni AI agent uchun tayyorlang",
+    heroSub: "Istalgan tilda yozing — biz uni inglizcha, aniq topshiriqqa aylantiramiz.",
     agent: "Agent",
     purpose: "Maqsad",
-    promptLabel: "Sizning promptingiz · istalgan til",
+    promptLabel: "Promptingiz",
     placeholder: "Masalan: React ilovamga GitHub orqali login qo'shib ber...",
     clear: "Tozalash",
     optimize: "Optimallashtirish",
-    optimizing: "...",
+    optimizing: "Tayyorlanmoqda...",
     output: "Optimallashtirilgan prompt · English",
-    outputEmpty: "Optimallashtirilgan prompt shu yerda chiqadi.",
     copy: "Nusxalash",
     copied: "Nusxalandi",
     error: "Xatolik yuz berdi. Qayta urinib ko'ring.",
-    aiMode: "AI rewriting",
+    aiMode: "AI rejimi",
     heuristicMode: "Heuristik rejim · to'liq AI uchun ANTHROPIC_API_KEY o'rnating",
   },
   en: {
-    tagline: "Turn any prompt into an English, agent-ready instruction",
+    heroTitle: "Get your prompt agent-ready",
+    heroSub: "Write in any language — we turn it into a clear, English instruction.",
     agent: "Agent",
     purpose: "Purpose",
-    promptLabel: "Your prompt · any language",
+    promptLabel: "Your prompt",
     placeholder: "Example: Add GitHub login to my React app...",
     clear: "Clear",
     optimize: "Optimize",
-    optimizing: "...",
+    optimizing: "Working...",
     output: "Optimized prompt · English",
-    outputEmpty: "Your optimized prompt will appear here.",
     copy: "Copy",
     copied: "Copied",
     error: "Something went wrong. Try again.",
-    aiMode: "AI rewriting",
+    aiMode: "AI mode",
     heuristicMode: "Heuristic mode · set ANTHROPIC_API_KEY for full AI rewriting",
   },
   ru: {
-    tagline: "Преобразуйте любой промпт в понятную англоязычную инструкцию",
+    heroTitle: "Подготовьте промпт для AI-агента",
+    heroSub: "Пишите на любом языке — мы превратим его в понятную англоязычную инструкцию.",
     agent: "Агент",
     purpose: "Назначение",
-    promptLabel: "Ваш промпт · любой язык",
+    promptLabel: "Ваш промпт",
     placeholder: "Например: Добавь вход через GitHub в моё React-приложение...",
     clear: "Очистить",
     optimize: "Оптимизировать",
-    optimizing: "...",
+    optimizing: "Обработка...",
     output: "Оптимизированный промпт · English",
-    outputEmpty: "Оптимизированный промпт появится здесь.",
     copy: "Скопировать",
     copied: "Скопировано",
     error: "Произошла ошибка. Попробуйте снова.",
-    aiMode: "AI rewriting",
+    aiMode: "Режим AI",
     heuristicMode: "Эвристический режим · установите ANTHROPIC_API_KEY для полного AI",
   },
 };
@@ -148,6 +149,8 @@ function App() {
     setCopied(true);
   }
 
+  const showResult = error || result !== null;
+
   return (
     <main className="app">
       <header className="topbar">
@@ -155,10 +158,7 @@ function App() {
           <span className="brand-mark">
             <Sparkles size={18} />
           </span>
-          <div>
-            <h1>PromptForge</h1>
-            <p>{t.tagline}</p>
-          </div>
+          <h1>PromptForge</h1>
         </div>
         <label className="language-select">
           <Languages size={16} />
@@ -170,9 +170,14 @@ function App() {
         </label>
       </header>
 
-      <section className="controls">
-        <div className="control-group">
-          <span className="control-label">{t.agent}</span>
+      <section className="hero">
+        <h2>{t.heroTitle}</h2>
+        <p>{t.heroSub}</p>
+      </section>
+
+      <section className="card composer">
+        <div className="field">
+          <span className="field-label">{t.agent}</span>
           <div className="segmented">
             {agents.map((item) => {
               const Icon = item.icon;
@@ -183,16 +188,18 @@ function App() {
                   onClick={() => setAgent(item.value)}
                 >
                   <Icon size={16} />
-                  <strong>{item.label}</strong>
-                  <small>{item.detail}</small>
+                  <span className="segment-text">
+                    <strong>{item.label}</strong>
+                    <small>{item.detail}</small>
+                  </span>
                 </button>
               );
             })}
           </div>
         </div>
 
-        <div className="control-group">
-          <span className="control-label">{t.purpose}</span>
+        <div className="field">
+          <span className="field-label">{t.purpose}</span>
           <div className="segmented">
             {purposes.map((item) => {
               const Icon = item.icon;
@@ -203,18 +210,18 @@ function App() {
                   onClick={() => setPurpose(item.value)}
                 >
                   <Icon size={16} />
-                  <strong>{item.label}</strong>
+                  <span className="segment-text">
+                    <strong>{item.label}</strong>
+                  </span>
                 </button>
               );
             })}
           </div>
         </div>
-      </section>
 
-      <section className="panes">
-        <section className="pane">
-          <div className="pane-head">
-            <span className="pane-label">{t.promptLabel}</span>
+        <div className="field">
+          <div className="field-head">
+            <span className="field-label">{t.promptLabel}</span>
             <span className="counter">{prompt.trim().length} / 4000</span>
           </div>
           <textarea
@@ -224,30 +231,38 @@ function App() {
             onChange={(event) => setPrompt(event.target.value)}
             placeholder={t.placeholder}
           />
-          <div className="pane-actions">
-            <button className="ghost" disabled={loading} onClick={reset}>
-              {t.clear}
-            </button>
-            <button className="primary" disabled={loading || prompt.trim().length < 3} onClick={optimize}>
-              <Wand2 size={16} />
-              {loading ? t.optimizing : t.optimize}
-            </button>
-          </div>
-        </section>
+        </div>
 
-        <section className="pane result">
-          <div className="pane-head">
-            <span className="pane-label">{t.output}</span>
-            <button className="icon-button" disabled={!result || loading} onClick={copyOutput}>
-              {copied ? <CheckCircle2 size={16} /> : <Clipboard size={16} />}
-              <span>{copied ? t.copied : t.copy}</span>
-            </button>
-          </div>
-          <pre className={error ? "result-box error-text" : "result-box"}>
-            {error ? t.error : result ? result.optimizedPrompt : t.outputEmpty}
-          </pre>
-        </section>
+        <div className="composer-actions">
+          <button className="ghost" disabled={loading} onClick={reset}>
+            {t.clear}
+          </button>
+          <button className="primary" disabled={loading || prompt.trim().length < 3} onClick={optimize}>
+            <Wand2 size={16} />
+            {loading ? t.optimizing : t.optimize}
+          </button>
+        </div>
       </section>
+
+      {showResult && (
+        <>
+          <div className="flow-arrow">
+            <ArrowDown size={18} />
+          </div>
+          <section className="card result-card">
+            <div className="result-head">
+              <span className="field-label">{t.output}</span>
+              <button className="icon-button" disabled={!result || loading} onClick={copyOutput}>
+                {copied ? <CheckCircle2 size={16} /> : <Clipboard size={16} />}
+                <span>{copied ? t.copied : t.copy}</span>
+              </button>
+            </div>
+            <pre className={error ? "result-box error-text" : "result-box"}>
+              {error ? t.error : result?.optimizedPrompt}
+            </pre>
+          </section>
+        </>
+      )}
 
       <footer className="footer">{result?.mode === "ai" ? t.aiMode : t.heuristicMode}</footer>
     </main>
