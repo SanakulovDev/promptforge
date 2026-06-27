@@ -12,6 +12,8 @@ export interface OptimizeRequest {
 export interface OptimizeResponse {
   optimizedPrompt: string;
   mode: "ai" | "heuristic";
+  /** Populated by the server; the engine itself is stateless. */
+  usage?: { used: number; limit: number };
 }
 
 const agentLabels: Record<Agent, string> = {
